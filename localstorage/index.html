@@ -1,0 +1,90 @@
+<html>
+  <head>
+    <title>To Do List</title>
+  </head>
+  <body onload="load()">
+    <div id="tasks">
+    </div>
+    <div id="new">
+      <input type="text" id="taskDescription" />
+      <button id="addTask">Add</button>
+    </div>
+
+
+    <script>
+
+      var toDoList = {
+        tasks: [],
+        nextId: 0
+        }
+
+      function load(){
+        var tasksFromStorage = localStorage.getItem("toDoList");
+        if(tasksFromStorage == null){
+          localStorage.setItem("toDoList", JSON.stringify(toDoList));
+        }
+        toDoList = JSON.parse(localStorage.getItem("toDoList"));
+
+        displayList();
+        document.querySelector("#addTask").addEventListener("click", addTask);
+      }
+
+      function saveToLocalStorage(){
+        localStorage.setItem("toDoList", JSON.stringify(toDoList));
+      }
+
+      function displayList(){
+        document.querySelector("#tasks").innerHTML = "";
+        var orderedTasks = toDoList.tasks.sort(function(a,b){return a.priority - b.priority})
+        
+        for(var i = 0; i < orderedTasks.length; i++){
+          var currentTask = orderedTasks[i];
+          var html = "<li>"+currentTask.name+" <button onclick='removeTask("+currentTask.id+")'>Remove</button></li>";
+          document.querySelector("#tasks").innerHTML += html; 
+        }
+
+        if(toDoList.tasks.length == 0){
+          document.querySelector("#tasks").innerHTML = "Enter Tasks Below!";
+        }
+
+      }
+
+      function addTask(){
+        var description = document.querySelector("#taskDescription").value;
+        var newTask = {};
+        newTask.id = toDoList.nextId++;
+        newTask.name = description;
+        newTask.dateCreated = new Date();
+        newTask.priority = getLastPriority();
+        toDoList.tasks.push(newTask);
+
+        //clear and <repaint></repaint>
+        document.querySelector("#taskDescription").value = "";
+        saveToLocalStorage();
+        displayList();
+      }
+
+      function removeTask(taskId){
+        var taskToRemove = toDoList.tasks.filter(function(a){return a.id == taskId})[0];
+        toDoList.tasks.splice(toDoList.tasks.indexOf(taskToRemove), 1);
+
+        saveToLocalStorage();
+        displayList();
+      }
+
+      function updateTask(taskId){
+
+      }
+
+      function getLastPriority(){
+        if(toDoList.tasks.length == 0){
+          return 1; //default priority
+        }
+        else{
+          return toDoList.tasks.sort(function(a,b){return b.priority - a.priority})[0].priority+1;
+        }
+      }
+
+    </script>
+  </body>
+</html>
