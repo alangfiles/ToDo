@@ -1,0 +1,60 @@
+body{
+    background: #ccc;
+    text-align:center;
+    margin-top:100px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.complete{
+    text-decoration: line-through;
+}
+
+.selected{
+    box-shadow: 0px 0px 10px #1a1aec;
+}
+
+#tasks{
+    text-align:left;
+    margin: 0 auto;
+    width: 520px;
+    margin-bottom: 20px;
+}
+
+.taskDate{
+    font-size: 0.6em;
+    float: right;
+    border-radius: 5px;
+    background: #fff;
+    margin:5px;
+    margin-top: 10px;
+    padding: 10px;
+    width: 160px;
+}
+
+.task{
+    border-radius: 5px;
+    background: #fff;
+    margin:5px;
+    padding: 10px;
+    display: inline-block;
+    width: 300px;
+}
+.description{
+    width: 250px;
+    float: left;
+}
+
+.actions{
+    text-align:right;
+    cursor: pointer;
+}
+
+#new{    
+    margin: 0 auto;
+    width: 300px;
+}
+#taskDescription{
+    float:left;
+    width: 250px;
+    border:none;
+}

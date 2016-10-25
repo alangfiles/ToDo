@@ -1,22 +1,36 @@
 <html>
   <head>
     <title>To Do List</title>
+    <link rel="stylesheet" href="todo.css">
   </head>
   <body onload="load()">
     <div id="tasks">
     </div>
     <div id="new">
-      <input type="text" id="taskDescription" />
-      <button id="addTask">Add</button>
+      <div class="task">
+        <input type="textarea" id="taskDescription" placeholder="Enter New Task" />
+        <div class="actions">
+          <span id="addTask">&#43;</span>
+        </div>
+      </div>
+      <input type="checkbox" id="showDates">Show Dates </input>
+      <input type="checkbox" id="showCompleted">Show Completed</input>
     </div>
-
 
     <script>
 
       var toDoList = {
         tasks: [],
+        taskIndex: 0,
+        completedTasks: [],
         nextId: 0
         }
+
+      var links = {
+        wikipedia: "https://en.wikipedia.org/wiki/Special:Search?go=Go&search=original+sin",
+        googleCalendar: ""
+      }
+
 
       function load(){
         var tasksFromStorage = localStorage.getItem("toDoList");
@@ -26,6 +40,10 @@
         toDoList = JSON.parse(localStorage.getItem("toDoList"));
 
         displayList();
+        document.querySelector("#taskDescription").addEventListener('keypress', function (e) {
+            var key = e.which || e.keyCode;
+            if (key === 13) {addTask()}
+        });
         document.querySelector("#addTask").addEventListener("click", addTask);
       }
 
@@ -37,14 +55,28 @@
         document.querySelector("#tasks").innerHTML = "";
         var orderedTasks = toDoList.tasks.sort(function(a,b){return a.priority - b.priority})
         
+        var html = "";
         for(var i = 0; i < orderedTasks.length; i++){
           var currentTask = orderedTasks[i];
-          var html = "<li>"+currentTask.name+" <button onclick='removeTask("+currentTask.id+")'>Remove</button></li>";
-          document.querySelector("#tasks").innerHTML += html; 
+          html += "<div class='task '>";
+          html += "<div class='description'>";
+            html += "<span class='incomplete'>"+currentTask.name+"</span>";
+          html += "</div>";
+            html += "<div class='actions'>";
+            html += "  <span onclick='completeTask("+currentTask.id+")'>&#10003;</span>  "
+            html += "  <span onclick='removeTask("+currentTask.id+")'>&#10007;</span>"
+            html += "</div>";
+          html += "</div>";
+          html += "<div class='taskDate'>";
+            html += formatDate(currentTask.dateCreated);
+          html += "</div>";
         }
 
         if(toDoList.tasks.length == 0){
-          document.querySelector("#tasks").innerHTML = "Enter Tasks Below!";
+          document.querySelector("#tasks").innerHTML = "<div style='text-align:center;'>Enter Tasks Below!</div>";
+        }
+        else{
+          document.querySelector("#tasks").innerHTML = html;
         }
 
       }
@@ -58,7 +90,7 @@
         newTask.priority = getLastPriority();
         toDoList.tasks.push(newTask);
 
-        //clear and <repaint></repaint>
+        //clear and repaint
         document.querySelector("#taskDescription").value = "";
         saveToLocalStorage();
         displayList();
@@ -72,8 +104,14 @@
         displayList();
       }
 
-      function updateTask(taskId){
+      function completeTask(taskId){
+        var taskToComplete = toDoList.tasks.filter(function(a){return a.id == taskId})[0];
+        toDoList.tasks.splice(toDoList.tasks.indexOf(taskToComplete), 1);
+        taskToComplete.dateCompleted = new Date();
+        toDoList.completedTasks.push(taskToComplete);
 
+        saveToLocalStorage();
+        displayList();
       }
 
       function getLastPriority(){
@@ -83,6 +121,12 @@
         else{
           return toDoList.tasks.sort(function(a,b){return b.priority - a.priority})[0].priority+1;
         }
+      }
+
+      function formatDate(iDate){
+        var d = new Date(iDate);
+        var today = new Date();
+        return Math.round((today - d)/86400000); //days old
       }
 
     </script>
