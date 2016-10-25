@@ -1,7 +1,6 @@
 body{
     background: #ccc;
     text-align:center;
-    margin-top:100px;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
@@ -16,7 +15,7 @@ body{
 #tasks{
     text-align:left;
     margin: 0 auto;
-    width: 520px;
+    width: 300px;
     margin-bottom: 20px;
 }
 
@@ -39,6 +38,16 @@ body{
     display: inline-block;
     width: 300px;
 }
+
+.inputBox{
+    border-radius: 5px;
+    background: #fff;
+    margin:5px;
+    padding: 10px;
+    display: inline-block;
+    width: 300px;
+}
+
 .description{
     width: 250px;
     float: left;

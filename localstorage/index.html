@@ -4,10 +4,8 @@
     <link rel="stylesheet" href="todo.css">
   </head>
   <body onload="load()">
-    <div id="tasks">
-    </div>
     <div id="new">
-      <div class="task">
+      <div class="inputBox">
         <input type="textarea" id="taskDescription" placeholder="Enter New Task" />
         <div class="actions">
           <span id="addTask">&#43;</span>
@@ -17,20 +15,31 @@
       <input type="checkbox" id="showCompleted">Show Completed</input>
     </div>
 
+    <div id="tasks">
+    </div>
+    
     <script>
 
       var toDoList = {
         tasks: [],
-        taskIndex: 0,
         completedTasks: [],
         nextId: 0
         }
 
-      var links = {
-        wikipedia: "https://en.wikipedia.org/wiki/Special:Search?go=Go&search=original+sin",
-        googleCalendar: ""
+      var linker = {
+        wikipedia: "https://en.wikipedia.org/wiki/Special:Search?go=Go&search=",
+        googleCalendar: "http://www.google.com/calendar/event?action=TEMPLATE&text=[event-title]&details=[description]&location=[location]&trp=false&sprop=&sprop=name:",
+        google: "https://www.google.com/?#q=",
+        bing: "https://www.bing.com/search?q=",
+        images: "https://www.google.com/search?tbm=isch&q=",
+        spacer: function(phrase){
+          return phrase.split(" ").join("+");
+        }
       }
 
+      var editMode = false;
+      var tasksNumbers = [];
+      var taskIndex = 0;
 
       function load(){
         var tasksFromStorage = localStorage.getItem("toDoList");
@@ -40,11 +49,70 @@
         toDoList = JSON.parse(localStorage.getItem("toDoList"));
 
         displayList();
+        taskIndex = 0;
+
         document.querySelector("#taskDescription").addEventListener('keypress', function (e) {
             var key = e.which || e.keyCode;
             if (key === 13) {addTask()}
         });
         document.querySelector("#addTask").addEventListener("click", addTask);
+
+        
+        document.addEventListener('keydown', function (e) {
+            var key = e.which || e.keyCode;
+            console.log(e.keyCode);
+            if (key === 27) {
+              editMode = !editMode;
+              document.querySelector("body").focus();
+            }
+            
+            if(editMode){
+              taskNumbers[taskIndex].classList.add("selected");
+
+              if(key === 74){ //down
+                taskNumbers[taskIndex].classList.remove("selected");
+                taskIndex = (taskIndex == taskNumbers.length-1) ? 0 : taskIndex+1;
+                taskNumbers[taskIndex].classList.add("selected");
+              }
+              if(key === 75){ //up
+                taskNumbers[taskIndex].classList.remove("selected");
+                taskIndex = (taskIndex == 0) ? taskNumbers.length-1 : taskIndex-1;
+                taskNumbers[taskIndex].classList.add("selected");
+              }
+              if(key === 13){
+                //lets search this funcshow
+                var searchText = taskNumbers[taskIndex].querySelector(".description span").innerHTML;
+                switch(searchText[0]){
+                  case "?":
+                    window.open(linker.wikipedia+linker.spacer(searchText.slice(1)));
+                    break;
+                  case ">":
+                    window.open(linker.googleCalendar.replace("[event-title]",linker.spacer(searchText.slice(1))));
+                    break;
+                  case "i":
+                    window.open(linker.images+linker.spacer(searchText.slice(1)));
+                    break;
+                  default:
+                    window.open(linker.bing+linker.spacer(searchText));
+                }
+              }
+
+              if(key === 88){ //x
+                var taskId = taskNumbers[taskIndex].id.slice(4);
+                removeTask(taskId*1);
+                taskIndex = 0;
+              }
+
+              if(key === 65){ //a
+                document.querySelector("#taskDescription").focus();
+                editMode = false;
+              }
+
+            }
+            else{
+              taskNumbers[taskIndex].classList.remove("selected");
+            }
+        });
       }
 
       function saveToLocalStorage(){
@@ -55,10 +123,12 @@
         document.querySelector("#tasks").innerHTML = "";
         var orderedTasks = toDoList.tasks.sort(function(a,b){return a.priority - b.priority})
         
+        taskIndex = orderedTasks[0].id;
+
         var html = "";
         for(var i = 0; i < orderedTasks.length; i++){
           var currentTask = orderedTasks[i];
-          html += "<div class='task '>";
+          html += "<div class='task' id='task"+currentTask.id+"'>";
           html += "<div class='description'>";
             html += "<span class='incomplete'>"+currentTask.name+"</span>";
           html += "</div>";
@@ -67,9 +137,11 @@
             html += "  <span onclick='removeTask("+currentTask.id+")'>&#10007;</span>"
             html += "</div>";
           html += "</div>";
-          html += "<div class='taskDate'>";
-            html += formatDate(currentTask.dateCreated);
-          html += "</div>";
+          //html += "<div class='taskDate'>";
+          //  html += formatDate(currentTask.dateCreated);
+          //html += "</div>";
+
+          taskNumbers = document.getElementsByClassName("task");
         }
 
         if(toDoList.tasks.length == 0){
