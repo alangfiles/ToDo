@@ -4,6 +4,18 @@ body{
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
+#editMode{
+    display:none;
+    position: absolute;
+    top: 10px;
+    left:10px;
+    background-color: #eee;
+    padding:5px;
+    font-weight:bold;
+    font-size:0.8em;
+    border-radius:3px;
+}
+
 .complete{
     text-decoration: line-through;
 }

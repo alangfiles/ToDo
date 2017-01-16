@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="todo.css">
   </head>
   <body onload="load()">
+      <div id="editMode">Edit Mode</div>
     <div id="new">
       <div class="inputBox">
         <input type="textarea" id="taskDescription" placeholder="Enter New Task" />
@@ -15,8 +16,7 @@
       <input type="checkbox" id="showCompleted">Show Completed</input>
     </div>
 
-    <div id="tasks">
-    </div>
+    <div id="tasks"></div>
     
     <script>
 
@@ -42,28 +42,39 @@
       var taskIndex = 0;
 
       function load(){
-        var tasksFromStorage = localStorage.getItem("toDoList");
-        if(tasksFromStorage == null){
+        //load up that toDoList, or create it if first run
+        if(localStorage.getItem("toDoList") == null){
           localStorage.setItem("toDoList", JSON.stringify(toDoList));
         }
-        toDoList = JSON.parse(localStorage.getItem("toDoList"));
-
+        else{
+            toDoList = JSON.parse(localStorage.getItem("toDoList"));
+        }
+        
         displayList();
         taskIndex = 0;
 
-        document.querySelector("#taskDescription").addEventListener('keypress', function (e) {
-            var key = e.which || e.keyCode;
-            if (key === 13) {addTask()}
-        });
+        document.querySelector("#taskDescription").addEventListener('keypress', checkForEnterKey);
         document.querySelector("#addTask").addEventListener("click", addTask);
 
-        
-        document.addEventListener('keydown', function (e) {
-            var key = e.which || e.keyCode;
-            console.log(e.keyCode);
-            if (key === 27) {
+        document.addEventListener('keydown', editKeyDown);
+      }
+
+      function checkForEnterKey(e){
+        var key = e.which || e.keyCode;
+        if (key === 13) {addTask()}
+      }
+
+      function editKeyDown(e){
+          var key = e.which || e.keyCode;
+            if (key === 27) {                
               editMode = !editMode;
-              document.querySelector("body").focus();
+              document.querySelector("#editMode").style.display = editMode ? 'block' : 'none';
+              if(editMode){
+                  document.querySelector("#taskDescription").blur();
+              }
+              else{
+                  document.querySelector("#taskDescription").focus();
+              }
             }
             
             if(editMode){
@@ -112,7 +123,6 @@
             else{
               taskNumbers[taskIndex].classList.remove("selected");
             }
-        });
       }
 
       function saveToLocalStorage(){
@@ -122,8 +132,8 @@
       function displayList(){
         document.querySelector("#tasks").innerHTML = "";
         var orderedTasks = toDoList.tasks.sort(function(a,b){return a.priority - b.priority})
-        
-        taskIndex = orderedTasks[0].id;
+
+        taskIndex = orderedTasks.length==0 ? 0 : orderedTasks[0].id;
 
         var html = "";
         for(var i = 0; i < orderedTasks.length; i++){
